@@ -177,8 +177,8 @@ class Agent:
 
     def load(self, agent_name):
         path = os.path.join(self.store, 'agents', agent_name + '.pth')
-        self.current.load_state_dict(torch.load(path))
-        self.target.load_state_dict(torch.load(path))
+        self.current.load_state_dict(torch.load(path, map_location=self.device))
+        self.target.load_state_dict(torch.load(path, map_location=self.device))
 
 
 

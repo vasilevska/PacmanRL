@@ -38,23 +38,30 @@ def save_config(STORE, agent_name, config):
 
 if __name__ == '__main__':
 
+    do_trian = True
+    do_eval = False
+
     STORE = 'rezults'
-    agent_name = get_index(STORE=STORE, save=True)
+    agent_name = get_index(STORE=STORE, save=do_trian)
 
 
     image_size = (88, 80)
     n_channels = 1
     num_episodes = 800
     start_steps = 500
+    learning_rate = 0.001
 
-    batch_size = 64
-    copy_steps = 20
-    steps_train = 4 # TODO
-    vizual_on_epoch = 30
-    discount_factor = 0.95
 
-    do_trian = True
-    do_eval = False
+    discount_factor = 0.97
+    eps_decay_steps = 500000
+
+
+    batch_size = 48
+    copy_steps = 100
+    steps_train = 4
+    vizual_on_epoch = 4
+
+
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -69,8 +76,7 @@ if __name__ == '__main__':
     dqn_config = {
         "state_size": image_size, 
         "channels": n_channels, 
-        "action_size": env.action_space(),
-        "num_hidden": 2
+        "action_size": env.action_space()
     }
 
     agent_config = {
@@ -78,12 +84,12 @@ if __name__ == '__main__':
         "epsilon": 0.5,
         "eps_min": 0.05,
         "eps_max": 1.0,
-        "eps_decay_steps": 150000,
+        "eps_decay_steps": eps_decay_steps,
         "n_outputs": env.action_space(),
         "buffer_len": 20000,
         "current": DQN(**dqn_config), 
         "target": DQN(**dqn_config),
-        "learning_rate": 0.001,
+        "learning_rate": learning_rate,
         "optimizer": "Adam",
         "store": STORE,
         "agent_name": agent_name,
@@ -100,7 +106,7 @@ if __name__ == '__main__':
                 copy_steps=copy_steps, steps_train=steps_train, vizual_on_epoch=vizual_on_epoch)
 
     if do_eval:
-        agent.load(agent_name=agent_name)
+        agent.load(agent_name='index_5')
         agent.evaluate()
 
 
