@@ -70,8 +70,6 @@ if __name__ == '__main__':
 
     env = Pacman()
     m = env.get_action_meanings()
-    print(m)
-    das
 
     dqn_config = {
         "state_size": image_size, 

@@ -3,6 +3,7 @@ import numpy as np
 from collections import namedtuple, deque
 
 from torch._C import device
+from cpprb import ReplayBuffer as RB
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -23,7 +24,6 @@ class ReplayMemory(object):
 
 
     def push(self, state, action, reward, next_state, done, *args):
-        
         self.memory.append(np.array([
             self._preprocess(var=state, dtype=self.state_dtype), 
             self._preprocess(var=action, dtype=self.action_dtype), 
@@ -53,7 +53,7 @@ class ReplayMemory(object):
         dones = torch.from_numpy(np.array(dones)).to(self.device)
        
 
-        return states, actions, rewards, next_states, dones
+        return states, actions, rewards, next_states, donesc
 
     def __len__(self):
         return len(self.memory)
@@ -69,3 +69,57 @@ class ReplayMemory(object):
             var = dtype(var)
 
         return var
+
+
+
+class ReplayBuffer:
+
+
+    def __init__(self, capacity, state_size, device=None, *args, **kwargs):
+
+        env_dict = {
+            "state": {"shape": state_size, "dtype": np.float32},
+            "action": {"shape": 1,"dtype": np.int64},
+            "reward": {},
+            "next_state": {"shape": state_size, "dtype":np.float32},
+            "done": {}
+            }
+
+        self.memory = RB(capacity, env_dict)
+        self.device = device
+
+
+    def push(self, state, action, reward, next_state, done, *args):
+        self.memory.add(
+            state=self._to_numpy(state), 
+            action=self._to_numpy(action), 
+            reward=self._to_numpy(reward), 
+            next_state=self._to_numpy(next_state), 
+            done=self._to_numpy(done)
+            )
+
+
+    def sample(self, batch_size):
+
+        sample = self.memory.sample(batch_size)
+        states = self._to_tensor(sample['state'])
+        actions = self._to_tensor(sample['action'])
+        rewards = self._to_tensor(sample['reward'])
+        next_states = self._to_tensor(sample['next_state'])
+        dones = self._to_tensor(sample['done'])
+
+        return states, actions, rewards, next_states, dones
+
+    def _to_numpy(self, val):
+
+        if torch.is_tensor(val):
+            return val.cpu().detach()
+
+        return val
+
+    def _to_tensor(self, val):
+
+        if torch.is_tensor(val):
+            return val
+
+        return torch.from_numpy(val).to(self.device)

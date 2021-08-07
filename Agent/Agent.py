@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from collections import deque, Counter
 
-from Agent.ReplayBuffer import ReplayMemory
+from Agent.ReplayBuffer import ReplayMemory, ReplayBuffer
 from Agent.Visualize import visualize_result, plot_training, counter_plot
 
 class Agent:
@@ -25,13 +25,15 @@ class Agent:
         self.agent_name = agent_name
         self.device = device
 
-        self.memory = ReplayMemory(capacity=buffer_len, device=self.device)
 
 
 
         # We create "live" and "target" networks from the original paper.
         self.current = current.to(device)
         self.target = target.to(device)
+
+        # self.memory = ReplayMemory(capacity=buffer_len, device=self.device) # CUSTOM
+        self.memory = ReplayBuffer(capacity=buffer_len, state_size=self.target.state_size, device=self.device)
 
         for p in self.target.parameters():
             p.requires_grad = False
@@ -119,6 +121,7 @@ class Agent:
                 if global_step % steps_train == 0 and global_step > start_steps:
 
                     states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+
                     qs = self.current(states)
 
 
@@ -201,7 +204,7 @@ class Agent:
 
             # feed the game screen and get the Q values for each action
             with torch.no_grad():
-                actions = self.target(state)
+                actions = self.current(state)
             # get the action
             action = np.argmax(actions, axis=-1)
             actions_counter[str(action)] += 1
