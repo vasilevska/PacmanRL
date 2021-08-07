@@ -33,7 +33,7 @@ class Agent:
         self.target = target.to(device)
 
         # self.memory = ReplayMemory(capacity=buffer_len, device=self.device) # CUSTOM
-        self.memory = ReplayBuffer(capacity=buffer_len, state_size=self.target.state_size, device=self.device)
+        self.memory = ReplayBuffer(capacity=buffer_len, state_size=self.target.state_size, num_classes=self.target.action_size, device=self.device)
 
         for p in self.target.parameters():
             p.requires_grad = False
@@ -96,7 +96,9 @@ class Agent:
                 state = state.to(self.device)
 
                 with torch.no_grad():
-                    actions = self.target(state)
+                    # actions = self.target(state)
+                    actions = self.current(state)
+
 
                 # get the action
                 action = torch.argmax(actions, axis=-1)
@@ -123,10 +125,7 @@ class Agent:
                     states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
 
                     qs = self.current(states)
-
-
                     qs_selected = torch.sum(qs * actions, dim = 1)
-
 
 
                     with torch.no_grad():

@@ -47,19 +47,19 @@ if __name__ == '__main__':
 
     image_size = (88, 80)
     n_channels = 1
-    num_episodes = 800
+    num_episodes = 1500
     start_steps = 500
-    learning_rate = 0.001
+    learning_rate = 0.0001
 
 
     discount_factor = 0.97
-    eps_decay_steps = 500000
+    eps_decay_steps = 250000
 
 
     batch_size = 48
-    copy_steps = 100
+    copy_steps = 10000
     steps_train = 4
-    vizual_on_epoch = 4
+    vizual_on_epoch = 40
 
 
 

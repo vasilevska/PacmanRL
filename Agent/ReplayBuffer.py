@@ -75,7 +75,7 @@ class ReplayMemory(object):
 class ReplayBuffer:
 
 
-    def __init__(self, capacity, state_size, device=None, *args, **kwargs):
+    def __init__(self, capacity, state_size, num_classes, device=None, *args, **kwargs):
 
         env_dict = {
             "state": {"shape": state_size, "dtype": np.float32},
@@ -87,6 +87,7 @@ class ReplayBuffer:
 
         self.memory = RB(capacity, env_dict)
         self.device = device
+        self.num_classes = num_classes
 
 
     def push(self, state, action, reward, next_state, done, *args):
@@ -108,7 +109,11 @@ class ReplayBuffer:
         next_states = self._to_tensor(sample['next_state'])
         dones = self._to_tensor(sample['done'])
 
-        return states, actions, rewards, next_states, dones
+        one_hot_acts = torch.squeeze(
+            torch.nn.functional.one_hot(actions, num_classes=self.num_classes)
+        )
+
+        return states, one_hot_acts, rewards, next_states, dones
 
     def _to_numpy(self, val):
 
