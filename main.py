@@ -50,7 +50,7 @@ if __name__ == '__main__':
     batch_size = 64
     copy_steps = 20
     steps_train = 4
-    vizual_on_epoch = 20
+    vizual_on_epoch = 4
     discount_factor = 0.95
 
     do_trian = True

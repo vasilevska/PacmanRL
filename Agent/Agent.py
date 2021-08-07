@@ -98,10 +98,11 @@ class Agent:
 
                 # get the action
                 action = torch.argmax(actions, axis=-1)
-                actions_counter[action.cpu().detach().item()] += 1
 
                 # select the action using epsilon greedy policy
                 action, epsilon = self.epsilon_greedy(action=action, step=global_step)
+                actions_counter[action.cpu().detach().item()] += 1
+
                 epsilons.append(epsilon)
                 # now perform the action and move to the next state, next_obs, receive reward
                 next_state, reward, done, _ = self.env.step(action)
