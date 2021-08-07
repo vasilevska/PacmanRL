@@ -54,7 +54,7 @@ class Agent:
     def epsilon_greedy(self, action, step):
         epsilon = max(self.eps_min, self.eps_max - (self.eps_max-self.eps_min) * step/self.eps_decay_steps) #Decaying policy with more steps
         if np.random.rand() < epsilon:
-            return np.random.randint(self.n_outputs), epsilon
+            return torch.tensor(np.random.randint(self.n_outputs)), epsilon
         else:
             return action, epsilon
 
@@ -101,6 +101,7 @@ class Agent:
 
                 # select the action using epsilon greedy policy
                 action, epsilon = self.epsilon_greedy(action=action, step=global_step)
+
                 actions_counter[action.cpu().detach().item()] += 1
 
                 epsilons.append(epsilon)
