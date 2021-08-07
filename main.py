@@ -2,6 +2,8 @@ from Model import DQN
 from GYM import Pacman
 from Agent import Agent
 
+import os
+import pickle
 import torch
 import matplotlib.pyplot as plt
 
@@ -14,12 +16,19 @@ def get_index(STORE, save=True):
         name = 1
 
     if save:
-        f = open(f"{STORE}/index.txt", 'w')
+        f = open(f"{STORE}/index.txt", 'w+')
         f.write(str(name))
         f.close()
     return f'index_{str(name)}'
 
 
+def save_config(STORE, agent_name, config):
+    path = os.path.join(STORE, 'config')
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(f'{os.path.join(path, agent_name)}.pkl', 'wb') as f:
+        pickle.dump(config, f)
 
 if __name__ == '__main__':
 
@@ -36,7 +45,7 @@ if __name__ == '__main__':
     copy_steps = 20
     steps_train = 4
     vizual_on_epoch = 20
-    discount_factor = 0.97
+    discount_factor = 0.95
 
     do_trian = True
     do_eval = False
@@ -51,7 +60,8 @@ if __name__ == '__main__':
     dqn_config = {
         "state_size": image_size, 
         "channels": n_channels, 
-        "action_size": 9
+        "action_size": env.action_space(),
+        "num_hidden": 2
     }
 
     agent_config = {
@@ -71,6 +81,8 @@ if __name__ == '__main__':
         "device": device,
         "batch_size": batch_size
     }
+
+    save_config(STORE=STORE, agent_name=agent_name, config=agent_config)
 
     agent = Agent(**agent_config)
 

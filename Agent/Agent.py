@@ -4,7 +4,7 @@ import numpy as np
 from collections import deque, Counter
 
 from Agent.ReplayBuffer import ReplayMemory
-from Agent.Visualize import visualize_result
+from Agent.Visualize import visualize_result, plot_training, counter_plot
 
 class Agent:
 
@@ -25,7 +25,6 @@ class Agent:
         self.agent_name = agent_name
         self.device = device
 
-        # self.exp_buffer = deque(maxlen=buffer_len)
         self.memory = ReplayMemory(capacity=buffer_len, device=self.device)
 
 
@@ -41,27 +40,24 @@ class Agent:
         if optimizer == "Adam":
             self.optimizer = torch.optim.Adam(self.current.parameters(), lr=learning_rate)
 
+
+        
+        if not os.path.exists(os.path.join(self.store)):
+            os.makedirs(os.path.join(self.store))
+
+        if not os.path.exists(os.path.join(self.store, 'plots')):
+            os.makedirs(os.path.join(self.store, 'plots'))
+
+        if not os.path.exists(os.path.join(self.store, 'agents')):
+            os.makedirs(os.path.join(self.store, 'agents'))
+
     def epsilon_greedy(self, action, step):
         epsilon = max(self.eps_min, self.eps_max - (self.eps_max-self.eps_min) * step/self.eps_decay_steps) #Decaying policy with more steps
         if np.random.rand() < epsilon:
-            return np.random.randint(self.n_outputs)
+            return np.random.randint(self.n_outputs), epsilon
         else:
-            return action
+            return action, epsilon
 
-    def sample_memories(self, batch_size=None):
-        
-        if batch_size == None:
-            batch_size = self.batch_size
-
-
-        perm_batch = np.random.permutation(len(self.exp_buffer))[:batch_size]
-
-        mem = np.array(self.exp_buffer)[perm_batch]
-
-        return mem[:,0],mem[:,1],mem[:,2], mem[:,3], mem[:,4]
-
-        return torch.from_numpy(mem[:,0]), torch.from_numpy(mem[:,1]), torch.from_numpy(mem[:,2]), torch.from_numpy(mem[:,3]), torch.from_numpy(mem[:,4])
-                        
     def update_target_model(self):
         self.target.load_state_dict(self.current.state_dict())
 
@@ -69,13 +65,15 @@ class Agent:
     def train(self, num_episodes, discount_factor=0.95, start_steps=50, 
                     copy_steps=20, steps_train=4, vizual_on_epoch=None, *args, **kwargs):
 
-        print(f'TRAIN ON: {self.device}')
+        print(f'TRAIN ON: {self.device}, AGENT INDEX: {self.agent_name}')
 
         history = []
         td_errors = []
+        epsilons = []
 
         global_step = 0
         epoch = 0
+
 
         for i in range(num_episodes):
 
@@ -100,10 +98,11 @@ class Agent:
 
                 # get the action
                 action = torch.argmax(actions, axis=-1)
-                actions_counter[str(action)] += 1
+                actions_counter[action.cpu().detach().item()] += 1
 
                 # select the action using epsilon greedy policy
-                action = self.epsilon_greedy(action=action, step=global_step)
+                action, epsilon = self.epsilon_greedy(action=action, step=global_step)
+                epsilons.append(epsilon)
                 # now perform the action and move to the next state, next_obs, receive reward
                 next_state, reward, done, _ = self.env.step(action)
 
@@ -155,11 +154,16 @@ class Agent:
                 print('Epochs per episode:', epoch, 'Episode Reward:', cum_reward, 'Episode number:', len(history), end='\r')
 
             if (vizual_on_epoch != None) & (epoch + 1) % vizual_on_epoch == 0:
-                fig = visualize_result(returns=history, td_errors=td_errors, policy_errors=None)
+                fig = visualize_result(returns=history, td_errors=td_errors, policy_errors=None)             
+                fig.savefig(os.path.join(self.store, 'plots', self.agent_name + '.png'), dpi=400)
 
-                if self.store != None:
-                    fig.savefig(os.path.join(self.store, 'plots', self.agent_name + '.png'), dpi=400)
-                    self.save()
+                fig = plot_training(epsilons=epsilons, train_loss=episodic_loss, cum_reward=history, counter=actions_counter)
+                fig.savefig(os.path.join(self.store, 'plots', 'metrics_' + self.agent_name + '.png'), dpi=400)
+
+                # fig = counter_plot(counter=actions_counter, name='Action Freq')
+                # fig.savefig(os.path.join(self.store, 'plots', 'counter_' + self.agent_name + '.png'), dpi=400)
+
+                self.save()
 
 
             epoch += 1
@@ -199,8 +203,6 @@ class Agent:
             # get the action
             action = np.argmax(actions, axis=-1)
             actions_counter[str(action)] += 1
-            # select the action using epsilon greedy policy
-            # action = epsilon_greedy(action, global_step)
             self.env.render()
             observation = new_observation
             # now perform the action and move to the next state, next_obs, receive reward

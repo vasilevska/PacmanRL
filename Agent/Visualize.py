@@ -35,3 +35,46 @@ def visualize_result(returns, td_errors, policy_errors=None):
 
     fig.tight_layout()
     return fig
+
+
+
+def counter_plot(counter, name):
+
+    fig = plt.figure()
+    plt.bar(counter.keys(), counter.values(), 0.33)
+
+    fig.suptitle(name, fontsize=20)
+    plt.xlabel('action', fontsize=18)
+    plt.ylabel('freq', fontsize=16)
+    
+    return fig
+
+
+def plot_training(epsilons, train_loss, cum_reward, counter):
+
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, figsize=[14, 16])
+
+
+    ax1.plot(epsilons)
+    ax1.set_title('Epsilon')
+    ax1.set_xlabel('num_of_steps')
+    ax1.set_ylabel('epsilon')
+
+    ax2.plot(train_loss)
+    ax2.set_title('Train Loss')
+    ax2.set_xlabel('num_of_steps')
+    ax2.set_ylabel('train_loss')
+
+    ax3.plot(cum_reward)
+    ax3.set_title('Cum Reward')
+    ax3.set_xlabel('num_of_steps')
+    ax3.set_ylabel('cum_reward')
+
+    ax4.bar(counter.keys(), counter.values(), 0.33)
+    ax4.set_title('Action Freq')
+    ax4.set_xlabel('action')
+    ax4.set_ylabel('freq')
+
+    return fig
+
+    
