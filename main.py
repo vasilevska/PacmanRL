@@ -12,7 +12,7 @@ def get_index(STORE, save=True):
 
     if not os.path.exists(STORE):
         os.makedirs(STORE)
-        
+
     try:
         f = open(f"{STORE}/index.txt", "r")
         name = int(f.read())+1
@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
     batch_size = 64
     copy_steps = 20
-    steps_train = 4
-    vizual_on_epoch = 4
+    steps_train = 4 # TODO
+    vizual_on_epoch = 30
     discount_factor = 0.95
 
     do_trian = True
@@ -62,6 +62,9 @@ if __name__ == '__main__':
 
 
     env = Pacman()
+    m = env.get_action_meanings()
+    print(m)
+    das
 
     dqn_config = {
         "state_size": image_size, 
@@ -75,7 +78,7 @@ if __name__ == '__main__':
         "epsilon": 0.5,
         "eps_min": 0.05,
         "eps_max": 1.0,
-        "eps_decay_steps": 500000,
+        "eps_decay_steps": 150000,
         "n_outputs": env.action_space(),
         "buffer_len": 20000,
         "current": DQN(**dqn_config), 

@@ -21,8 +21,9 @@ class DQN(nn.Module):
             next_ch = 2*prev_ch
 
         modules.append(nn.Flatten())
-        modules.append(nn.Linear(prev_ch*state_size[0]*state_size[1], self.action_size, dtype=torch.float32))
+        modules.append(nn.Linear(prev_ch*state_size[0]*state_size[1], prev_ch*state_size[0], dtype=torch.float32))
         modules.append(nn.ReLU())
+        modules.append(nn.Linear(prev_ch*state_size[0], self.action_size, dtype=torch.float32))
 
 
         super(DQN, self).__init__()
