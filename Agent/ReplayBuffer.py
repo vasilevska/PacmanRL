@@ -4,6 +4,9 @@ from collections import namedtuple, deque
 
 from torch._C import device
 
+import warnings
+warnings.filterwarnings('ignore')
+
 
 
 
@@ -58,7 +61,7 @@ class ReplayMemory(object):
     @staticmethod
     def _preprocess(var, dtype):
         if torch.is_tensor(var):
-            var = var.detach().numpy()
+            var = var.cpu().detach().numpy()
         if hasattr(var, 'shape'):
             var = var.astype(dtype)
             var = np.squeeze(var)

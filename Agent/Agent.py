@@ -69,6 +69,8 @@ class Agent:
     def train(self, num_episodes, discount_factor=0.95, start_steps=50, 
                     copy_steps=20, steps_train=4, vizual_on_epoch=None, *args, **kwargs):
 
+        print(f'TRAIN ON: {self.device}')
+
         history = []
         td_errors = []
 
@@ -91,12 +93,13 @@ class Agent:
 
                 state = torch.from_numpy(state)
                 state = state.float()
+                state = state.to(self.device)
 
                 with torch.no_grad():
                     actions = self.target(state)
 
                 # get the action
-                action = np.argmax(actions, axis=-1)
+                action = torch.argmax(actions, axis=-1)
                 actions_counter[str(action)] += 1
 
                 # select the action using epsilon greedy policy
@@ -149,7 +152,7 @@ class Agent:
                 global_step += 1
 
                 history.append(cum_reward)
-                print('Epochs per episode:', epoch, 'Episode Reward:', cum_reward, 'Episode number:', len(history))
+                print('Epochs per episode:', epoch, 'Episode Reward:', cum_reward, 'Episode number:', len(history), end='\r')
 
             if (vizual_on_epoch != None) & (epoch + 1) % vizual_on_epoch == 0:
                 fig = visualize_result(returns=history, td_errors=td_errors, policy_errors=None)
