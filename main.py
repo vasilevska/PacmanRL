@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 
 
 def get_index(STORE, save=True):
+
+    if not os.path.exists(STORE):
+        os.makedirs(STORE)
+        
     try:
         f = open(f"{STORE}/index.txt", "r")
         name = int(f.read())+1
@@ -23,6 +27,8 @@ def get_index(STORE, save=True):
 
 
 def save_config(STORE, agent_name, config):
+
+
     path = os.path.join(STORE, 'config')
     if not os.path.exists(path):
         os.makedirs(path)
@@ -32,7 +38,7 @@ def save_config(STORE, agent_name, config):
 
 if __name__ == '__main__':
 
-    STORE = './rezults'
+    STORE = 'rezults'
     agent_name = get_index(STORE=STORE, save=True)
 
 
