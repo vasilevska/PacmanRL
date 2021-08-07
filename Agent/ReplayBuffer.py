@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 
 class ReplayMemory(object):
 
-    def __init__(self, capacity, device=None):
+    def __init__(self, capacity, device=None, num_classes, *args, **kwargs):
         self.memory = deque([],maxlen=capacity)
         self.device = device
 
@@ -21,6 +21,7 @@ class ReplayMemory(object):
         self.state_dtype=np.float32
         self.action_dtype=np.int64
         self.default_dtype=np.float32
+        self.num_classes = num_classes
 
 
     def push(self, state, action, reward, next_state, done, *args):
@@ -51,9 +52,14 @@ class ReplayMemory(object):
         rewards = torch.from_numpy(np.array(rewards)).to(self.device)
         next_states = torch.from_numpy(np.array(next_states)).to(self.device)
         dones = torch.from_numpy(np.array(dones)).to(self.device)
-       
+        
+        
+        one_hot_acts = torch.squeeze(
+            torch.nn.functional.one_hot(actions, num_classes=self.num_classes)
+        )
 
-        return states, actions, rewards, next_states, donesc
+
+        return states, one_hot_acts, rewards, next_states, donesc
 
     def __len__(self):
         return len(self.memory)

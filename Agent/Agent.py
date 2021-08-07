@@ -32,7 +32,7 @@ class Agent:
         self.current = current.to(device)
         self.target = target.to(device)
 
-        # self.memory = ReplayMemory(capacity=buffer_len, device=self.device) # CUSTOM
+        # self.memory = ReplayMemory(capacity=buffer_len, device=self.device, num_classes=self.target.action_size) # CUSTOM
         self.memory = ReplayBuffer(capacity=buffer_len, state_size=self.target.state_size, num_classes=self.target.action_size, device=self.device)
 
         for p in self.target.parameters():
