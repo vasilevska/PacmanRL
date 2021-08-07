@@ -29,11 +29,13 @@ if __name__ == '__main__':
 
     image_size = (88, 80)
     n_channels = 1
-    num_episodes = 200
+    num_episodes = 800
     start_steps = 500
+
+    batch_size = 64
     copy_steps = 20
     steps_train = 4
-    vizual_on_epoch = 1
+    vizual_on_epoch = 20
     discount_factor = 0.97
 
     do_trian = True
@@ -66,7 +68,8 @@ if __name__ == '__main__':
         "optimizer": "Adam",
         "store": STORE,
         "agent_name": agent_name,
-        "device": device
+        "device": device,
+        "batch_size": batch_size
     }
 
     agent = Agent(**agent_config)
