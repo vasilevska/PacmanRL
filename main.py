@@ -89,6 +89,7 @@ if __name__ == '__main__':
 
     m = env.get_action_meanings()
 
+
     dqn_config = {
         "state_size": image_size, 
         "channels": n_channels, 
