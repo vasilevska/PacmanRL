@@ -1,5 +1,6 @@
 import os
 import torch
+import time
 import numpy as np
 from collections import deque, Counter
 
@@ -214,6 +215,7 @@ class Agent:
             observation = new_observation
             # now perform the action and move to the next state, next_obs, receive reward
             new_observation, reward, done, _ = self.env.step(action)
+            time.sleep(0.05)
             if done:
                 # observation = self.env.reset()
                 break

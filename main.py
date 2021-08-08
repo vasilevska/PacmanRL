@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     do_trian = True
     do_eval = False
-    do_preprocesing = False
+    do_preprocesing = True
 
 
     STORE = 'rezults'
@@ -74,13 +74,17 @@ if __name__ == '__main__':
     input_shape = (None, o.shape[0], o.shape[1], o.shape[2] if len(o.shape)==3 else 1)
     image_size = (o.shape[0], o.shape[1], o.shape[2] if len(o.shape)==3 else 1)
 
-# #%%
-#     observation = env.reset()
+    # observation = env.reset()
 
-#     import matplotlib.pyplot as plt
-#     plt.imshow(observation)
-#     plt.show()
-#     observation, _, _, _ = env.step(1)
+    # import matplotlib.pyplot as plt
+    # plt.imshow(env.preprocess_observation(observation))
+    # plt.savefig('img.png')
+
+    # plt.show()
+
+    # plt.imshow(observation)
+
+    # plt.show()
 
 
 #%%
@@ -123,7 +127,7 @@ if __name__ == '__main__':
                 copy_steps=copy_steps, steps_train=steps_train, vizual_on_epoch=vizual_on_epoch)
 
     if do_eval:
-        agent.load(agent_name='index_5')
+        agent.load(agent_name='index_7')
         agent.evaluate()
 
 

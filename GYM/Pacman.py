@@ -38,17 +38,29 @@ class Pacman:
       if self.do_preprocesing == False:
         return obs
 
-        # Crop and resize the image
+
+
+      # Crop and resize the image
       img = obs[1:176:2, ::2]
+      return rgb2gray(img)
       # Convert the image to greyscale
       img = img.mean(axis=2)
       # Improve image contrast
-      # img[img==123] = 0
+      img[img==123] = 0
       # Next we normalize the image from -1 to +1
       img = (img - 128) / 128-1
       # img = torch.from_numpy(img.reshape(channels, state_size[0], state_size[1]))
       # img = img.type(torch.float32)
       return img
+
+
+  
+def rgb2gray(rgb):
+
+    r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
+    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+
+    return gray
 
 if __name__ == '__main__':
   env = gym.make("MsPacman-v0")
