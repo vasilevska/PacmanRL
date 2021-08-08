@@ -31,7 +31,7 @@ class Pacman:
 
 
 
-  def preprocess_observation(self, obs, channels, state_size):
+  def preprocess_observation(self, obs, channels=None, state_size=None):
 
         # Crop and resize the image
       img = obs[1:176:2, ::2]
