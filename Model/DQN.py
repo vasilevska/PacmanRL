@@ -21,19 +21,23 @@ class DQN(nn.Module):
         # #     next_ch = 2*prev_ch
 
         modules.append(nn.Conv2d(in_channels=channels, out_channels=32, kernel_size=(8, 8), stride=4, dtype=torch.float32))
+        modules.append(nn.ReLU())
         modules.append(nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, dtype=torch.float32))
+        modules.append(nn.ReLU())
         modules.append(nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, dtype=torch.float32))
+        modules.append(nn.ReLU())
+
 
         modules.append(nn.Flatten())
-        modules.append(nn.Linear(2688, 128, dtype=torch.float32))
-        modules.append(nn.ReLU())
-        modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
+        # modules.append(nn.Linear(2688*channels, 128, dtype=torch.float32))
+        # modules.append(nn.ReLU())
+        # modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
 
 
 
         super(DQN, self).__init__()
         self.neuralnet = nn.Sequential(*modules)
-
+        print(self.neuralnet)
 
     def forward(self, x):
 

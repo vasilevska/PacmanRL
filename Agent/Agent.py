@@ -88,7 +88,7 @@ class Agent:
 
                 # get the preprocessed game screen
                 state = self.env.preprocess_observation(obs=state, channels=self.target.channels, state_size=self.target.state_size)
-
+                
                 state = torch.from_numpy(state)
                 state = state.float()
                 state = state.to(self.device)
