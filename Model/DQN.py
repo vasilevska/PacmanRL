@@ -29,15 +29,15 @@ class DQN(nn.Module):
 
 
         modules.append(nn.Flatten())
-        # modules.append(nn.Linear(2688*channels, 128, dtype=torch.float32))
-        # modules.append(nn.ReLU())
-        # modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
 
+
+        modules.append(nn.Linear(2688, 128, dtype=torch.float32))
+        modules.append(nn.ReLU())
+        modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
 
 
         super(DQN, self).__init__()
         self.neuralnet = nn.Sequential(*modules)
-        print(self.neuralnet)
 
     def forward(self, x):
 

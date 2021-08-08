@@ -3,6 +3,7 @@ import numpy as np
 from collections import namedtuple, deque
 
 from torch._C import device
+from cpprb import ReplayBuffer as RB
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -12,7 +13,7 @@ warnings.filterwarnings('ignore')
 
 class ReplayMemory(object):
 
-    def __init__(self, capacity, device=None):
+    def __init__(self, capacity, device=None, num_classes=None, *args, **kwargs):
         self.memory = deque([],maxlen=capacity)
         self.device = device
 
@@ -20,10 +21,10 @@ class ReplayMemory(object):
         self.state_dtype=np.float32
         self.action_dtype=np.int64
         self.default_dtype=np.float32
+        self.num_classes = num_classes
 
 
     def push(self, state, action, reward, next_state, done, *args):
-        
         self.memory.append(np.array([
             self._preprocess(var=state, dtype=self.state_dtype), 
             self._preprocess(var=action, dtype=self.action_dtype), 
@@ -51,9 +52,14 @@ class ReplayMemory(object):
         rewards = torch.from_numpy(np.array(rewards)).to(self.device)
         next_states = torch.from_numpy(np.array(next_states)).to(self.device)
         dones = torch.from_numpy(np.array(dones)).to(self.device)
-       
+        
+        
+        one_hot_acts = torch.squeeze(
+            torch.nn.functional.one_hot(actions, num_classes=self.num_classes)
+        )
 
-        return states, actions, rewards, next_states, dones
+
+        return states, one_hot_acts, rewards, next_states, donesc
 
     def __len__(self):
         return len(self.memory)
@@ -69,3 +75,62 @@ class ReplayMemory(object):
             var = dtype(var)
 
         return var
+
+
+
+class ReplayBuffer:
+
+
+    def __init__(self, capacity, state_size, num_classes, device=None, *args, **kwargs):
+
+        env_dict = {
+            "state": {"shape": state_size, "dtype": np.float32},
+            "action": {"shape": 1,"dtype": np.int64},
+            "reward": {},
+            "next_state": {"shape": state_size, "dtype":np.float32},
+            "done": {}
+            }
+
+        self.memory = RB(capacity, env_dict)
+        self.device = device
+        self.num_classes = num_classes
+
+
+    def push(self, state, action, reward, next_state, done, *args):
+        self.memory.add(
+            state=self._to_numpy(state), 
+            action=self._to_numpy(action), 
+            reward=self._to_numpy(reward), 
+            next_state=self._to_numpy(next_state), 
+            done=self._to_numpy(done)
+            )
+
+
+    def sample(self, batch_size):
+
+        sample = self.memory.sample(batch_size)
+        states = self._to_tensor(sample['state'])
+        actions = self._to_tensor(sample['action'])
+        rewards = self._to_tensor(sample['reward'])
+        next_states = self._to_tensor(sample['next_state'])
+        dones = self._to_tensor(sample['done'])
+
+        one_hot_acts = torch.squeeze(
+            torch.nn.functional.one_hot(actions, num_classes=self.num_classes)
+        )
+
+        return states, one_hot_acts, rewards, next_states, dones
+
+    def _to_numpy(self, val):
+
+        if torch.is_tensor(val):
+            return val.cpu().detach()
+
+        return val
+
+    def _to_tensor(self, val):
+
+        if torch.is_tensor(val):
+            return val
+
+        return torch.from_numpy(val).to(self.device)

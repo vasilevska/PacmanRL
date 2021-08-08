@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from collections import deque, Counter
 
-from Agent.ReplayBuffer import ReplayMemory
+from Agent.ReplayBuffer import ReplayMemory, ReplayBuffer
 from Agent.Visualize import visualize_result, plot_training, counter_plot
 
 class Agent:
@@ -25,13 +25,15 @@ class Agent:
         self.agent_name = agent_name
         self.device = device
 
-        self.memory = ReplayMemory(capacity=buffer_len, device=self.device)
 
 
 
         # We create "live" and "target" networks from the original paper.
         self.current = current.to(device)
         self.target = target.to(device)
+
+        # self.memory = ReplayMemory(capacity=buffer_len, device=self.device, num_classes=self.target.action_size) # CUSTOM
+        self.memory = ReplayBuffer(capacity=buffer_len, state_size=self.target.state_size, num_classes=self.target.action_size, device=self.device)
 
         for p in self.target.parameters():
             p.requires_grad = False
@@ -70,6 +72,7 @@ class Agent:
         history = []
         td_errors = []
         epsilons = []
+        episodic_loss = []
 
         global_step = 0
         epoch = 0
@@ -81,7 +84,6 @@ class Agent:
             done = False
             state = self.env.reset()
             actions_counter = Counter()
-            episodic_loss = []
             # while the state is not the terminal state
 
             while not done:
@@ -94,7 +96,9 @@ class Agent:
                 state = state.to(self.device)
 
                 with torch.no_grad():
-                    actions = self.target(state)
+                    # actions = self.target(state)
+                    actions = self.current(state)
+
 
                 # get the action
                 action = torch.argmax(actions, axis=-1)
@@ -119,11 +123,9 @@ class Agent:
                 if global_step % steps_train == 0 and global_step > start_steps:
 
                     states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+
                     qs = self.current(states)
-
-
                     qs_selected = torch.sum(qs * actions, dim = 1)
-
 
 
                     with torch.no_grad():
@@ -145,7 +147,7 @@ class Agent:
 
 
                 # after some interval we copy our main Q network weights to target Q network                
-                if (global_step+1) % copy_steps == 0 and global_step > start_steps:
+                if ((global_step+1) % copy_steps) == 0 and global_step > start_steps:
                     self.update_target_model()
 
                 state = next_state
@@ -155,7 +157,7 @@ class Agent:
                 history.append(cum_reward)
                 print('Epochs per episode:', epoch, 'Episode Reward:', cum_reward, 'Episode number:', len(history), end='\r')
 
-            if (vizual_on_epoch != None) & (epoch + 1) % vizual_on_epoch == 0:
+            if (vizual_on_epoch != None) & (((epoch + 1) % vizual_on_epoch) == 0):
                 fig = visualize_result(returns=history, td_errors=td_errors, policy_errors=None)             
                 fig.savefig(os.path.join(self.store, 'plots', self.agent_name + '.png'), dpi=400)
 
@@ -201,7 +203,7 @@ class Agent:
 
             # feed the game screen and get the Q values for each action
             with torch.no_grad():
-                actions = self.target(state)
+                actions = self.current(state)
             # get the action
             action = np.argmax(actions, axis=-1)
             actions_counter[str(action)] += 1

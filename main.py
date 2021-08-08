@@ -14,7 +14,7 @@ def get_index(STORE, save=True):
 
     if not os.path.exists(STORE):
         os.makedirs(STORE)
-        
+
     try:
         f = open(f"{STORE}/index.txt", "r")
         name = int(f.read())+1
@@ -54,17 +54,17 @@ if __name__ == '__main__':
     n_channels = 3 if do_preprocesing == False else 1
     num_episodes = 800
     start_steps = 500
-    learning_rate = 0.001
+    learning_rate = 0.0001
 
 
     discount_factor = 0.97
-    eps_decay_steps = 500000
+    eps_decay_steps = 250000
 
 
     batch_size = 48
-    copy_steps = 100
+    copy_steps = 10000
     steps_train = 4
-    vizual_on_epoch = 4
+    vizual_on_epoch = 40
 
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -73,8 +73,6 @@ if __name__ == '__main__':
 
 
     env = Pacman(do_preprocesing=do_preprocesing)
-
-
 # #%%
 #     observation = env.reset()
 
@@ -88,6 +86,7 @@ if __name__ == '__main__':
 
 
 
+    m = env.get_action_meanings()
 
     dqn_config = {
         "state_size": image_size, 
