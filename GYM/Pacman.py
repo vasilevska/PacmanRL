@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 
 class Pacman:
 
-  def __init__(self):
+  def __init__(self, do_preprocesing=True):
     self.env = gym.make("MsPacman-v0")
+    self.do_preprocesing = do_preprocesing
 
   def action_space(self):
     return self.env.action_space.n
@@ -31,7 +32,11 @@ class Pacman:
 
 
 
-  def preprocess_observation(self, obs, channels=None, state_size=None):
+  def preprocess_observation(self, obs, channels=None, state_size=None, *args, **kwargs):
+
+
+      if self.do_preprocesing == False:
+        return obs
 
         # Crop and resize the image
       img = obs[1:176:2, ::2]

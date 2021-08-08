@@ -1,3 +1,5 @@
+#%%
+
 from Model import DQN
 from GYM import Pacman
 from Agent import Agent
@@ -36,18 +38,21 @@ def save_config(STORE, agent_name, config):
     with open(f'{os.path.join(path, agent_name)}.pkl', 'wb') as f:
         pickle.dump(config, f)
 
+
 if __name__ == '__main__':
 
     do_trian = True
     do_eval = False
+    do_preprocesing = True
+
 
     STORE = 'rezults'
     agent_name = get_index(STORE=STORE, save=do_trian)
 
 
     image_size = (88, 80)
-    n_channels = 1
-    num_episodes = 1500
+    n_channels = 3 if do_preprocesing == False else 1
+    num_episodes = 800
     start_steps = 500
     learning_rate = 0.0001
 
@@ -62,13 +67,25 @@ if __name__ == '__main__':
     vizual_on_epoch = 40
 
 
-
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     input_shape = (None, 88, 80, 1)
 
 
-    env = Pacman()
+    env = Pacman(do_preprocesing=do_preprocesing)
+# #%%
+#     observation = env.reset()
+
+#     import matplotlib.pyplot as plt
+#     plt.imshow(observation)
+#     plt.show()
+#     observation, _, _, _ = env.step(1)
+
+
+
+
+
+
     m = env.get_action_meanings()
 
 

@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 
 class ReplayMemory(object):
 
-    def __init__(self, capacity, device=None, num_classes, *args, **kwargs):
+    def __init__(self, capacity, device=None, num_classes=None, *args, **kwargs):
         self.memory = deque([],maxlen=capacity)
         self.device = device
 
