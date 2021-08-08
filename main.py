@@ -43,7 +43,8 @@ if __name__ == '__main__':
 
     do_trian = True
     do_eval = False
-    do_preprocesing = True
+    do_preprocesing = False
+    do_resnet = True
 
 
     STORE = 'rezults'
@@ -74,17 +75,17 @@ if __name__ == '__main__':
     input_shape = (None, o.shape[0], o.shape[1], o.shape[2] if len(o.shape)==3 else 1)
     image_size = (o.shape[0], o.shape[1], o.shape[2] if len(o.shape)==3 else 1)
 
-    # observation = env.reset()
+    observation = env.reset()
 
-    # import matplotlib.pyplot as plt
-    # plt.imshow(env.preprocess_observation(observation))
-    # plt.savefig('img.png')
+    import matplotlib.pyplot as plt
+    plt.imshow(env.preprocess_observation(observation))
+    plt.savefig('img.png')
 
-    # plt.show()
+    plt.show()
 
-    # plt.imshow(observation)
+    plt.imshow(observation)
 
-    # plt.show()
+    plt.show()
 
 
 #%%
@@ -97,7 +98,8 @@ if __name__ == '__main__':
     dqn_config = {
         "state_size": image_size, 
         "channels": n_channels, 
-        "action_size": env.action_space()
+        "action_size": env.action_space(),
+        "do_resnet": do_resnet
     }
 
     agent_config = {
@@ -127,7 +129,7 @@ if __name__ == '__main__':
                 copy_steps=copy_steps, steps_train=steps_train, vizual_on_epoch=vizual_on_epoch)
 
     if do_eval:
-        agent.load(agent_name='index_7')
+        agent.load(agent_name='index_10')
         agent.evaluate()
 
 

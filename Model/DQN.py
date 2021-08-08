@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-
+import torchvision
 
 
 class DQN(nn.Module):
 
-    def __init__(self, state_size, channels, action_size, num_hidden=1, kernel_size=8, *args, **kwargs):
+    def __init__(self, state_size, channels, action_size, num_hidden=1, kernel_size=8, do_resnet=False, *args, **kwargs):
         self.state_size=state_size
         self.channels=channels
         self.action_size=action_size
@@ -20,27 +20,39 @@ class DQN(nn.Module):
         # #     prev_ch = next_ch
         # #     next_ch = 2*prev_ch
 
-        modules.append(nn.Conv2d(in_channels=channels, out_channels=32, kernel_size=(8, 8), stride=4, dtype=torch.float32))
-        modules.append(nn.ReLU())
-        modules.append(nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, dtype=torch.float32))
-        modules.append(nn.ReLU())
-        modules.append(nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, dtype=torch.float32))
-        modules.append(nn.ReLU())
+
+        if do_resnet == False:
+            modules.append(nn.Conv2d(in_channels=channels, out_channels=32, kernel_size=(8, 8), stride=4, dtype=torch.float32))
+            modules.append(nn.ReLU())
+            modules.append(nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, dtype=torch.float32))
+            modules.append(nn.ReLU())
+            modules.append(nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, dtype=torch.float32))
+            modules.append(nn.ReLU())
 
 
-        modules.append(nn.Flatten())
+            modules.append(nn.Flatten())
 
-        if channels == 1:
-            modules.append(nn.Linear(2688, 128, dtype=torch.float32))
+            if channels == 1:
+                modules.append(nn.Linear(2688, 128, dtype=torch.float32))
+            else:
+                modules.append(nn.Linear(22528, 128, dtype=torch.float32))
+
+            modules.append(nn.ReLU())
+            modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
+            super(DQN, self).__init__()
+            self.neuralnet = nn.Sequential(*modules)
+
         else:
-            modules.append(nn.Linear(22528, 128, dtype=torch.float32))
+            super(DQN, self).__init__()
+            
+            self.neuralnet = torchvision.models.resnet18(pretrained=True)
+            for param in self.neuralnet.parameters():
+                param.requires_grad = False
 
-        modules.append(nn.ReLU())
-        modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
 
+            num_ftrs = self.neuralnet.fc.in_features
+            self.neuralnet.fc = nn.Linear(num_ftrs, self.action_size)
 
-        super(DQN, self).__init__()
-        self.neuralnet = nn.Sequential(*modules)
 
     def forward(self, x):
 
