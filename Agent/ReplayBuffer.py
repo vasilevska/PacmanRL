@@ -94,6 +94,7 @@ class ReplayBuffer:
         self.memory = RB(capacity, env_dict)
         self.device = device
         self.num_classes = num_classes
+        self.state_size = state_size
 
 
     def push(self, state, action, reward, next_state, done, *args):
@@ -109,10 +110,10 @@ class ReplayBuffer:
     def sample(self, batch_size):
 
         sample = self.memory.sample(batch_size)
-        states = self._to_tensor(sample['state'])
+        states = self._to_tensor(sample['state']).view(-1, self.state_size[2], self.state_size[0], self.state_size[1])
         actions = self._to_tensor(sample['action'])
         rewards = self._to_tensor(sample['reward'])
-        next_states = self._to_tensor(sample['next_state'])
+        next_states = self._to_tensor(sample['next_state']).view(-1, self.state_size[2], self.state_size[0], self.state_size[1])
         dones = self._to_tensor(sample['done'])
 
         one_hot_acts = torch.squeeze(

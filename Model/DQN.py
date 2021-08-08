@@ -30,8 +30,11 @@ class DQN(nn.Module):
 
         modules.append(nn.Flatten())
 
+        if channels == 1:
+            modules.append(nn.Linear(2688, 128, dtype=torch.float32))
+        else:
+            modules.append(nn.Linear(22528, 128, dtype=torch.float32))
 
-        modules.append(nn.Linear(2688, 128, dtype=torch.float32))
         modules.append(nn.ReLU())
         modules.append(nn.Linear(128, self.action_size, dtype=torch.float32))
 

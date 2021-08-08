@@ -43,14 +43,13 @@ if __name__ == '__main__':
 
     do_trian = True
     do_eval = False
-    do_preprocesing = True
+    do_preprocesing = False
 
 
     STORE = 'rezults'
     agent_name = get_index(STORE=STORE, save=do_trian)
 
 
-    image_size = (88, 80)
     n_channels = 3 if do_preprocesing == False else 1
     num_episodes = 800
     start_steps = 500
@@ -68,11 +67,13 @@ if __name__ == '__main__':
 
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    input_shape = (None, 88, 80, 1)
-
-
     env = Pacman(do_preprocesing=do_preprocesing)
+
+
+    o = env.preprocess_observation(env.reset())
+    input_shape = (None, o.shape[0], o.shape[1], o.shape[2] if len(o.shape)==3 else 1)
+    image_size = (o.shape[0], o.shape[1], o.shape[2] if len(o.shape)==3 else 1)
+
 # #%%
 #     observation = env.reset()
 
@@ -82,7 +83,7 @@ if __name__ == '__main__':
 #     observation, _, _, _ = env.step(1)
 
 
-
+#%%
 
 
 
@@ -126,3 +127,7 @@ if __name__ == '__main__':
 
 
 
+
+# %%
+
+# %%

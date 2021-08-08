@@ -95,6 +95,7 @@ class Agent:
                 state = state.float()
                 state = state.to(self.device)
 
+
                 with torch.no_grad():
                     # actions = self.target(state)
                     actions = self.current(state)
@@ -123,6 +124,8 @@ class Agent:
                 if global_step % steps_train == 0 and global_step > start_steps:
 
                     states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+
+                    # print(states.shape, actions.shape, rewards.shape, next_states.shape, dones.shape)
 
                     qs = self.current(states)
                     qs_selected = torch.sum(qs * actions, dim = 1)
